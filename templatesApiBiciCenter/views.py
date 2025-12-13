@@ -1,12 +1,19 @@
-from django.shortcuts import render
-from django.http import JsonResponse
+from rest_framework import viewsets
+from rest_framework.permissions import AllowAny
+from .models import Bicicleta, Repuesto, Accesorio
+from .serializers import BicicletaSerializer, RepuestoSerializer, AccesorioSerializer
 
-def bici_center_view(request):
-    data = {
-        'message': 'Welcome to the Bici Center API!',
-        'status': 'success'
-    }
-    return JsonResponse(data)
+class BicicletaViewSet(viewsets.ModelViewSet):
+    queryset = Bicicleta.objects.all()
+    serializer_class = BicicletaSerializer
+    permission_classes = [AllowAny]
 
-def home_view(request):
-    return render(request, 'home.html')
+class RepuestoViewSet(viewsets.ModelViewSet):
+    queryset = Repuesto.objects.all()
+    serializer_class = RepuestoSerializer
+    permission_classes = [AllowAny]
+
+class AccesorioViewSet(viewsets.ModelViewSet):
+    queryset = Accesorio.objects.all()
+    serializer_class = AccesorioSerializer
+    permission_classes = [AllowAny]
