@@ -32,23 +32,24 @@ INSTALLED_APPS = [
 ]
 DATABASES = {
     'default': {
-        'NAME': 'bicicenter_db',
+        'NAME': 'bicicenter_db',         
         'ENGINE': 'django.db.backends.mysql',
         'USER': 'root',
-        'PASSWORD': 'bici12345',  
-        'HOST': '136.112.163.234',
+        'PASSWORD': 'bici12345',
+        'HOST': '136.112.163.234',       
         'PORT': '3306',
     }
 }
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny', # Permite leer sin login por ahora
+        'rest_framework.permissions.IsAuthenticated', 
     ],
 }
-
+LOGIN_REDIRECT_URL = '/api/'
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -69,7 +70,8 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
-                'django.template.context_processors.request',
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request', # <--- AQUÍ FALTABA LA COMA ANTES
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -79,7 +81,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'apiBiciCenter.wsgi.application'
 
-
+SESSION_COOKIE_NAME = 'sessionid_api'
+CSRF_COOKIE_NAME = 'csrftoken_api'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
