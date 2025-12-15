@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from decimal import Decimal
+from django.db.models.signals import m2m_changed  
+from django.dispatch import receiver
 
 TIPOS_BICICLETA = [
     ('mountain', 'Montaña'),
@@ -157,3 +159,12 @@ class OrdenMantenimiento(models.Model):
     
     def __str__(self):
         return f"Orden #{self.id} - {self.cliente.username}"
+    
+
+@receiver(m2m_changed, sender=OrdenMantenimiento.servicios.through)
+def calcular_total_orden(sender, instance, action, **kwargs):
+    if action in ["post_add", "post_remove", "post_clear"]:
+        servicios = instance.servicios.all()
+        total_calculado = sum(servicio.precio for servicio in servicios)
+        instance.total = total_calculado
+        instance.save()

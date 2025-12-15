@@ -13,7 +13,6 @@ from templatesApiBiciCenter.views import (
 
 
 router = DefaultRouter()
-router.register(r'bicicletas', views.BicicletaViewSet)
 router.register('bicicletas', BicicletaViewSet, basename='bicicletas')
 router.register('repuestos', RepuestoViewSet, basename='repuestos')
 router.register('accesorios', AccesorioViewSet, basename='accesorios')

@@ -6,6 +6,8 @@ from rest_framework.authtoken.models import Token
 from django.db.models import Sum
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from .serializers import OrdenCompraSerializer 
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 
 from .models import (
     Bicicleta, Repuesto, Accesorio, CarritoItem,
@@ -44,15 +46,41 @@ def user_profile(request):
     
     return Response(data)
 
+@csrf_exempt
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def register_user(request):
+    # 1. Validamos los datos con el serializador (para chequear email, tipos de datos, etc)
     serializer = UserSerializer(data=request.data)
+    
     if serializer.is_valid():
-        user = serializer.save()
+        # 2. OBTENEMOS LOS DATOS LIMPIOS, PERO NO GUARDAMOS AÚN
+        username = serializer.validated_data['username']
+        email = serializer.validated_data.get('email', '')
+        first_name = serializer.validated_data.get('first_name', '')
+        last_name = serializer.validated_data.get('last_name', '')
+        password = request.data.get('password')
+        try:
+            user = User.objects.create_user(
+                username=username,
+                email=email,
+                password=password, 
+                first_name=first_name,
+                last_name=last_name
+            )
+        except Exception as e:
+            return Response({'success': False, 'error': f'Error al crear usuario: {str(e)}'}, status=400)
         token, _ = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key, 'user': serializer.data}, status=201)
-    return Response(serializer.errors, status=400)
+        return Response({
+            'success': True,
+            'token': token.key,
+            'user': {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email
+            }
+        }, status=201)
+    return Response({'success': False, 'error': serializer.errors}, status=400)
 
 @api_view(['POST'])
 @permission_classes([AllowAny]) 

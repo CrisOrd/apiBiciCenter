@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.reverse import reverse
 from .models import (
     Bicicleta, Repuesto, Accesorio, CarritoItem, 
     OrdenCompra, DetalleOrden, BicicletaCliente, 
@@ -10,18 +11,41 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
-
+    def create(self, validated_data):
+        user = User.objects.create_user(**validated_data)
+        return user
+    
 class BicicletaSerializer(serializers.ModelSerializer):
+    def get_url(self, obj):
+        request = self.context.get('request')
+        if request is None:
+            return None
+        return reverse('bicicletas-detail', kwargs={'pk': obj.pk}, request=request)
+    
+    url = serializers.SerializerMethodField()
+    
     class Meta:
         model = Bicicleta
         fields = '__all__'
 
 class RepuestoSerializer(serializers.ModelSerializer):
+    def get_url(self, obj):
+        request = self.context.get('request')
+        return reverse('repuestos-detail', kwargs={'pk': obj.pk}, request=request)
+    
+    url = serializers.SerializerMethodField()
+    
     class Meta:
         model = Repuesto
         fields = '__all__'
 
 class AccesorioSerializer(serializers.ModelSerializer):
+    def get_url(self, obj):
+        request = self.context.get('request')
+        return reverse('accesorios-detail', kwargs={'pk': obj.pk}, request=request)
+    
+    url = serializers.SerializerMethodField()
+    
     class Meta:
         model = Accesorio
         fields = '__all__'
@@ -107,4 +131,5 @@ class OrdenMantenimientoSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrdenMantenimiento
         fields = '__all__'
-        read_only_fields = ['cliente', 'fecha_recepcion']
+        read_only_fields = ['fecha_recepcion']
+
